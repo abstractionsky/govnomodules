@@ -2,7 +2,6 @@ from telethon import events
 from help_registry import help_registry
 
 async def ping_handler(event):
-    """Обработчик команды .ping"""
     message = await event.reply("🏓 Ping...")
     await message.edit("🏓 Pong!")
 
