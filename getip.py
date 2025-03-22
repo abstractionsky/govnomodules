@@ -17,7 +17,7 @@ async def getip_handler(event):
 async def register(client):
     client.add_event_handler(
         getip_handler,
-        events.NewMessage(pattern=r"^\.mc(?:\s+(\S+))?$")
+        events.NewMessage(pattern=r"^\.getip(?:\s+(\S+))?$")
     )
     help_registry.register_command(
         command='.getip [domain]',
