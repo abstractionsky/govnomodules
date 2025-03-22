@@ -1,7 +1,6 @@
 from telethon import events
 from help_registry import help_registry
 from modules import owner_only
-from help_registry import help_registry
 import socket
 
 @owner_only
