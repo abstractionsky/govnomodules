@@ -58,9 +58,12 @@ async def clone_profile_handler(event):
         ))
 
         if target.photo:
-            photo = await event.client.download_profile_photo(target, file=bytes())
-            await event.client(functions.photos.UploadProfilePhotoRequest(
-                file=await event.client.upload_file(photo)
+            photo = await event.client.download_profile_photo(target, file=bytes)
+            uploaded_file = await event.client.upload_file(photo)
+            await event.client(
+                functions.photos.UploadProfilePhotoRequest(
+                    file=uploaded_file
+                )
             )
 
         await event.reply("✅ Профиль успешно скопирован! Используйте .restoreprofile для отмены")
