@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 BACKUP_FILE = "profile_backup.json"
 
 async def backup_current_profile(client):
-    """Создание резервной копии текущего профиля"""
     me = await client.get_me()
     profile = {
         'first_name': me.first_name,
@@ -22,7 +21,6 @@ async def backup_current_profile(client):
 
 @owner_only
 async def clone_profile_handler(event):
-    """Обработчик команды .stealprofile"""
     try:
         if event.sender_id != event.client.owner_id:
             await event.delete()
@@ -42,24 +40,20 @@ async def clone_profile_handler(event):
             await event.reply("❌ Цель не найдена")
             return
 
-        # Создаем резервную копию
         await backup_current_profile(event.client)
 
-        # Копируем данные
         await event.client(functions.account.UpdateProfileRequest(
             first_name=target.first_name or "",
             last_name=target.last_name or "",
-            about=(await event.client(functions.users.GetFullUserRequest(target))['about'])
+            about=await event.client(functions.users.GetFullUserRequest(target))['about']
         ))
 
-        # Копируем аватарку
         if target.photo:
             photo = await event.client.download_profile_photo(target)
             await event.client(functions.photos.UploadProfilePhotoRequest(
                 file=await event.client.upload_file(photo)
             ))
 
-        # Премиум-эмодзи (только для премиум)
         if target.premium:
             await event.client(functions.account.UpdateEmojiStatusRequest(
                 emoji_status=target.emoji_status
@@ -72,7 +66,6 @@ async def clone_profile_handler(event):
 
 @owner_only
 async def restore_profile_handler(event):
-    """Восстановление оригинального профиля"""
     try:
         if not os.path.exists(BACKUP_FILE):
             await event.reply("❌ Резервная копия не найдена")
