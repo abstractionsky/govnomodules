@@ -16,6 +16,7 @@ async def ping_handler(event):
         response = (
             f"{status_emoji} **Скорость отклика Telegram**\n"
             f"• Задержка: `{latency:.2f} мс`\n"
+            f"• Сервер: `{event.client.session.server_address}`"
         )
         await event.reply(response, parse_mode='markdown')
     except Exception as e:
