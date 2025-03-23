@@ -49,7 +49,7 @@ async def clone_profile_handler(event):
         await event.client(functions.account.UpdateProfileRequest(
             first_name=target.first_name or "",
             last_name=target.last_name or "",
-            about=(await event.client(functions.users.GetFullUserRequest(target))['about']
+            about=(await event.client(functions.users.GetFullUserRequest(target))['about'])
         ))
 
         # Копируем аватарку
