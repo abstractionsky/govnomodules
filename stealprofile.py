@@ -89,7 +89,7 @@ async def restore_profile_handler(event):
         if backup['photo']:
             await event.client(functions.photos.UploadProfilePhotoRequest(
                 file=await event.client.upload_file(backup['photo'])
-            )
+            ))
 
         os.remove(BACKUP_FILE)
         await event.reply("✅ Профиль восстановлен")
