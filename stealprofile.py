@@ -13,7 +13,7 @@ async def backup_current_profile(client):
     profile = {
         'first_name': me.first_name,
         'last_name': me.last_name,
-        'about': (await client(functions.account.GetProfileRequest())['about'],
+        'about': await client(functions.account.GetProfileRequest())['about'],
         'photo': await client.download_profile_photo(me.id, file=bytes)
     }
     with open(BACKUP_FILE, 'wb') as f:
