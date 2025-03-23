@@ -18,9 +18,9 @@ async def ping_handler(event):
             f"• Задержка: `{latency:.2f} мс`\n"
             f"• Сервер: `{event.client.session.server_address}`"
         )
-        await event.reply(response, parse_mode='markdown')
+        await event.edit(response, parse_mode='markdown')
     except Exception as e:
-        await event.reply(f"❌ Ошибка измерения: {str(e)}")
+        await event.edit(f"❌ Ошибка измерения: {str(e)}")
 
 async def register(client):
     client.add_event_handler(
