@@ -4,12 +4,12 @@ import requests
 import logging
 from urllib.parse import urlparse
 from telethon import events
-from help_registry import help_registry
 from modules import owner_only
+from help_registry import help_registry
 
 logger = logging.getLogger(__name__)
-CONFIG_FILE = "repositories.json"
-MODULES_DIR = "modules"
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "repositories.json")
+MODULES_DIR = os.path.dirname(__file__)
 
 class RepoManager:
     def __init__(self):
@@ -18,7 +18,6 @@ class RepoManager:
     def load_config(self):
         if not os.path.exists(CONFIG_FILE):
             return []
-            
         with open(CONFIG_FILE, "r") as f:
             return json.load(f)
 
@@ -29,12 +28,8 @@ class RepoManager:
     def add_repo(self, url):
         if any(r['url'] == url for r in self.repositories):
             return False
-            
         repo_name = urlparse(url).path.strip('/').split('/')[-1]
-        self.repositories.append({
-            "url": url,
-            "name": repo_name
-        })
+        self.repositories.append({"url": url, "name": repo_name})
         self.save_config()
         return True
 
@@ -49,25 +44,23 @@ async def get_raw_url(github_url, module_name):
 @owner_only
 async def repo_handler(event):
     args = event.pattern_match.group(1)
+    
     if args:
         if not args.startswith("https://github.com/"):
-            await event.edit("❌ Только GitHub репозитории поддерживаются")
+            await event.reply("❌ Only GitHub repos supported")
             return
-            
         if repo_manager.add_repo(args):
-            await event.edit(f"✅ Репозиторий добавлен: {args}")
+            await event.reply(f"✅ Repo added: {args}")
         else:
-            await event.edit("⚠️ Репозиторий уже существует в списке")
+            await event.reply("⚠️ Repo already exists")
     else:
         if not repo_manager.repositories:
-            await event.edit("📦 Список репозиториев пуст")
+            await event.reply("📦 No repos in list")
             return
-            
-        response = "📚 Список репозиториев:\n\n"
+        response = "📚 Repositories:\n\n"
         for idx, repo in enumerate(repo_manager.repositories, 1):
             response += f"{idx}. {repo['name']} - {repo['url']}\n"
-        
-        await event.edit(response)
+        await event.reply(response)
 
 @owner_only
 async def irepo_handler(event):
@@ -78,28 +71,27 @@ async def irepo_handler(event):
             
         index = int(args[0]) - 1
         module_name = args[1]
-        
         repo = repo_manager.repositories[index]
         raw_url = await get_raw_url(repo['url'], module_name)
         
         response = requests.get(raw_url)
         response.raise_for_status()
         
-        os.makedirs(MODULES_DIR, exist_ok=True)
-        with open(os.path.join(MODULES_DIR, f"{module_name}.py"), "w") as f:
+        module_path = os.path.join(MODULES_DIR, f"{module_name}.py")
+        with open(module_path, "w", encoding="utf-8") as f:
             f.write(response.text)
             
-        await event.edit(f"✅ Модуль {module_name} установлен из {repo['name']}")
+        await event.reply(f"✅ Module {module_name} installed to:\n{module_path}")
 
     except IndexError:
-        await event.edit("❌ Неверный индекс репозитория")
+        await event.reply("❌ Invalid repo index")
     except Exception as e:
-        await event.edit(f"❌ Ошибка: {str(e)}")
+        await event.reply(f"❌ Error: {str(e)}")
 
 async def register(client):
     client.add_event_handler(
         repo_handler,
-        events.NewMessage(pattern=r"^\.repo(?:\s+(.+)|$")
+        events.NewMessage(pattern=r"^\.repo(?:\s+(.+))?$")
     )
     client.add_event_handler(
         irepo_handler,
