@@ -86,7 +86,7 @@ async def irepo_handler(event):
     except IndexError:
         await event.reply("❌ Invalid repo index")
     except Exception as e:
-        await event.reply(f"❌ Error: {str(e)}")
+        await event.reply(f"❌ Error: {e}")
 
 async def register(client):
     client.add_event_handler(
