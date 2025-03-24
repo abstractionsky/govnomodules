@@ -4,8 +4,6 @@ import requests
 import logging
 from urllib.parse import urlparse
 from telethon import events
-from modules import owner_only
-from help_registry import help_registry
 
 logger = logging.getLogger(__name__)
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "repositories.json")
@@ -39,31 +37,37 @@ async def get_raw_url(github_url, module_name):
     parsed = urlparse(github_url)
     path_parts = parsed.path.split('/')
     user, repo = path_parts[1], path_parts[2]
-    return f"https://raw.githubusercontent.com/{user}/{repo}/main/{module_name}.py"
+    return f"https://raw.githubusercontent.com/{user}/{repo}/main/modules/{module_name}.py"
 
-@owner_only
 async def repo_handler(event):
+    if event.sender_id != event.client.owner_id:
+        await event.delete()
+        return
+
     args = event.pattern_match.group(1)
     
     if args:
         if not args.startswith("https://github.com/"):
-            await event.reply("❌ Only GitHub repos supported")
+            await event.reply("❌ Поддерживаются только GitHub репозитории")
             return
         if repo_manager.add_repo(args):
-            await event.reply(f"✅ Repo added: {args}")
+            await event.reply(f"✅ Репозиторий добавлен: {args}")
         else:
-            await event.reply("⚠️ Repo already exists")
+            await event.reply("⚠️ Репозиторий уже существует в списке")
     else:
         if not repo_manager.repositories:
-            await event.reply("📦 No repos in list")
+            await event.reply("📦 Список репозиториев пуст")
             return
-        response = "📚 Repositories:\n\n"
+        response = "📚 Список репозиториев:\n\n"
         for idx, repo in enumerate(repo_manager.repositories, 1):
             response += f"{idx}. {repo['name']} - {repo['url']}\n"
         await event.reply(response)
 
-@owner_only
 async def irepo_handler(event):
+    if event.sender_id != event.client.owner_id:
+        await event.delete()
+        return
+
     try:
         args = event.pattern_match.group(1).split()
         if len(args) != 2:
@@ -81,12 +85,14 @@ async def irepo_handler(event):
         with open(module_path, "w", encoding="utf-8") as f:
             f.write(response.text)
             
-        await event.reply(f"✅ Module {module_name} installed to:\n{module_path}")
+        await event.reply(f"✅ Модуль {module_name} установлен!\nПуть: {module_path}")
 
     except IndexError:
-        await event.reply("❌ Invalid repo index")
+        await event.reply("❌ Неверный индекс репозитория")
+    except requests.exceptions.RequestException:
+        await event.reply("❌ Ошибка загрузки модуля с GitHub")
     except Exception as e:
-        await event.reply(f"❌ Error: {e}")
+        await event.reply(f"❌ Ошибка: {str(e)}")
 
 async def register(client):
     client.add_event_handler(
