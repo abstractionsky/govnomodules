@@ -4,6 +4,8 @@ import requests
 import logging
 from urllib.parse import urlparse
 from telethon import events
+from modules import owner_only
+from help_registry import help_registry
 
 logger = logging.getLogger(__name__)
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "repositories.json")
@@ -39,11 +41,8 @@ async def get_raw_url(github_url, module_name):
     user, repo = path_parts[1], path_parts[2]
     return f"https://raw.githubusercontent.com/{user}/{repo}/main/modules/{module_name}.py"
 
+@owner_only
 async def repo_handler(event):
-    if event.sender_id != event.client.owner_id:
-        await event.delete()
-        return
-
     args = event.pattern_match.group(1)
     
     if args:
@@ -63,11 +62,8 @@ async def repo_handler(event):
             response += f"{idx}. {repo['name']} - {repo['url']}\n"
         await event.reply(response)
 
+@owner_only
 async def irepo_handler(event):
-    if event.sender_id != event.client.owner_id:
-        await event.delete()
-        return
-
     try:
         args = event.pattern_match.group(1).split()
         if len(args) != 2:
