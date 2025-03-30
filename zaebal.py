@@ -31,7 +31,7 @@ async def message_modifier(event):
             except Exception as e:
                 logger.error(f"Ошибка: {str(e)}")
 
-def register(client):
+async def register(client):
     client.add_event_handler(
         zaebal_command,
         events.NewMessage(pattern=r"^\.zaebal\s+(on|off)$")
