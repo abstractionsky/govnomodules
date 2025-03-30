@@ -22,7 +22,7 @@ async def zaebal_command(event):
 
 async def message_modifier(event):
     global zaebal_mode
-    if zaebal_mode and event.is_outgoing:
+    if zaebal_mode == True:
         text = event.raw_text
         if text and not text.startswith("."):
             try:
