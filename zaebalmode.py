@@ -20,7 +20,6 @@ async def zaebal_command(event):
     else:
         await event.edit("❌ Используйте: `.zaebal [on/off]`")
 
-@owner_only
 async def message_modifier(event):
     global zaebal_mode
     if zaebal_mode and event.is_outgoing:
